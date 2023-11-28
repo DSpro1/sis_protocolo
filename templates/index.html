@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sistema de protocolo</title>
+</head>
+<body>
+    <form method="POST" action="{{ url_for('index') }}">
+        {{ form.hidden_tag() }}
+        {{ form.nomeUsuario.label }} {{ form.nomeUsuario(size=32) }}<br>
+        {{ form.senha.label }} {{ form.senha(size=32) }}<br>
+        <input type="submit" value="Submit">
+    </form>
+    
+</body>
+</html>
