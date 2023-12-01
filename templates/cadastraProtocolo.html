@@ -6,10 +6,11 @@
     <title>Document</title>
 </head>
 <body>
-    <form action="{{url_for(cad_protocolo)}}" method="post">
-        {{formProtoc.hidden_tag}}     
-        {{formProtoc.assunto.label}}  {{formProtoc.assunto.size(32)}}
-        {{formProtoc.data.label}}     {{formProtoc.data.size(32)}}
+    <form action="{{url_for('cad_protocolo')}}" method="post">
+        {{formProtoc.hidden_tag()}}     
+        {{formProtoc.assunto.label}}  {{formProtoc.assunto(size=32)}}
+        {{formProtoc.data.label}}     {{formProtoc.data(size=32)}}
+        <input type="submit" value="Submit">
     </form>
 </body>
 </html>
