@@ -34,7 +34,7 @@ with app.app_context():
   
 #=======autenticação=======
 from flask_wtf import FlaskForm
-from wtforms import StringField
+from wtforms import HiddenField, StringField
 from wtforms.validators import input_required
 from flask_jwt_extended import JWTManager
 
@@ -45,6 +45,7 @@ class FormLogin(FlaskForm):
     senha = StringField("senha", validators=[input_required()])
 
 class FormProtocolo(FlaskForm):
+    idProtoc = HiddenField('ID Protocolo')
     assunto = StringField("assunto", validators=[input_required()])
     dat = StringField("data", validators=[input_required()])
 
@@ -89,9 +90,7 @@ def cadastraUsuario():
 @app.route('/visual_protocolo')
 def visual_protocolo():
     form_protocolo = FormProtocolo()
-    
     protocoloDict=prot_dict()
-   
     return render_template("visual_protocolo.html", prot_dicts=protocoloDict, formProtoc = form_protocolo, cadastrar=True)
 
 @app.route('/cad_protocolo/', methods=['POST'])
@@ -111,19 +110,29 @@ def cad_protocolo():
 @app.route('/edit_protocolo/', methods=['GET', 'POST'])
 def edit_protocolo():
     form_protocolo = FormProtocolo()
-    
+    idProtoc = request.args.get('idProtoc')
+    protocolo = db.session.query(Protocolo).filter_by(numero=idProtoc).first() 
     if request.method=='POST':
-        
+        print('idProtoc= ', idProtoc)
         if form_protocolo.validate_on_submit():
+            #captura os dados digitados e validados do formulário
             assunto = form_protocolo.assunto.data
             data =  form_protocolo.dat.data
-            print(idProtoc)
+            #atualiza os dados do objeto pelos dados novos
+            protocolo.assunto=assunto
+            protocolo.data=data
+            #insere na seção e depois no banco
+            db.session.add(protocolo)
+            db.session.commit()
             
         return redirect(url_for('visual_protocolo'))
-    
-    idProtoc = request.args.get('idProtoc') #como eu faço para que o valor do idProtoc seja quardado até que seja realizado uma solicitação post
-    protocolo = db.session.query(Protocolo).filter_by(numero=idProtoc).first() 
+         
+    form_protocolo.idProtoc.data = idProtoc
+
     prot_dicts=prot_dict()
+    #agora como eu faço para jogar esses dados [assunto, data] do protoc, nos campos input do formulário
+    form_protocolo.assunto.data = protocolo.assunto
+    form_protocolo.dat.data = protocolo.data
     return render_template('visual_protocolo.html', protoc=protocolo, prot_dicts=prot_dicts, formProtoc=form_protocolo, cadastrar=False)
     
 
@@ -133,7 +142,6 @@ def prot_dict():
     for protocolo in protocolos:
         protocoloDict[protocolo.numero]={"assunto":protocolo.assunto, "data":protocolo.data}
     return protocoloDict
-
 
 
 if __name__ == "__main__":

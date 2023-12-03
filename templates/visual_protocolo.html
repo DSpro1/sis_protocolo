@@ -67,7 +67,8 @@
     </div>
     {% if cadastrar == False %}
     <h5>atualizar</h5>
-    <form action="{{url_for('edit_protocolo')}}" method="post">
+    <!-- agora eu quero saber como faço para pegar os dados enviados-->
+    <form action="{{url_for('edit_protocolo', idProtoc=formProtoc.idProtoc.data)}}" method="post">
         {{formProtoc.hidden_tag()}}
         <div class="form-group">
             {{formProtoc.assunto.label}}  {{formProtoc.assunto(size=32)}}
