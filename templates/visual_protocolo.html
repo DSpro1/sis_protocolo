@@ -4,25 +4,114 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Adicione o script do Bootstrap e o jQuery (necessário para o Bootstrap) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <link rel="stylesheet" href="../static/geral.css">
+    <link rel="stylesheet" href="../static/formulario.css">
+    <link rel="stylesheet" href="../static/tabela.css">
+
+    <style>
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover{
+            color: #0056b3;
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>numero</th>
-                <th>assunto</th>
-                <th>data</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for protocolo in protocolos %}
-            <tr>
-                <td>{{protocolo.numero}}</td>
-                <td>{{protocolo.assunto}}</td>
-                <td>{{protocolo.data}}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <!--esse header está sendo mostrado no meiu da página-->
+    <header>
+        <h1>Lista de Protocolo</h1>
+    </header>
+    <!--esse link está sendo mostrado do lado esquerdo da tabela ocupando o espaço da tabela eu quero deixálo logo abaixo do header e acima da tabela-->
+    <a href="{{url_for('cad_protocolo')}}" data-toggle="modal" data-target="#cadProtocoloModal">adicionar protocolo</a>
+   
+    <!-- Modal cadastro-->
+    <div class="modal fade" id="cadProtocoloModal" tabindex="-1" role="dialog" aria-labelledby="cadProtocoloModal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cadProtocoloModalLabel">Protocolo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    
+                    <h5>cadastrar</h5>
+                    <form action="{{url_for('cad_protocolo')}}" method="post">
+                        {{formProtoc.hidden_tag()}}
+                        <div class="form-group">
+                            {{formProtoc.assunto.label}}  {{formProtoc.assunto(size=32)}}
+                        </div>     
+            
+                        <div class="form-group">
+                            {{formProtoc.dat.label}}     {{formProtoc.dat(size=32)}}
+                        </div>
+                            
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">registrar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if cadastrar == False %}
+    <h5>atualizar</h5>
+    <form action="{{url_for('edit_protocolo')}}" method="post">
+        {{formProtoc.hidden_tag()}}
+        <div class="form-group">
+            {{formProtoc.assunto.label}}  {{formProtoc.assunto(size=32)}}
+        </div>     
+
+        <div class="form-group">
+            {{formProtoc.dat.label}}     {{formProtoc.dat(size=32)}}
+        </div>
+            
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">alterar</button>
+        </div>
+    </form>
+    {% endif %}
+    <div class="form-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>numero</th>
+                    <th>assunto</th>
+                    <th>data</th>
+
+                </tr>
+            </thead>
+        
+        
+            <tbody>
+                {% for chave, valor in prot_dicts.items() %}
+                <tr>
+                    <td>{{chave}}</td>
+                    <td>{{valor['assunto']}}</td>
+                    <td>{{valor['data']}}</td>
+                    
+                    <td><a href="{{url_for('edit_protocolo', idProtoc=chave)}}" >editar</a></td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+   
+        </table>
+    </div>
 </body>
+
+</script>
+
+
 </html>

@@ -3,10 +3,10 @@ from sqlalchemy import Column, Integer, String
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-
+global cadastrar
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///protocolo.db'
 db = SQLAlchemy(app)
-
+global idProtoc
 app.config['SECRET_KEY'] =  'CHA1321'
 
 class Administrador(db.Model):
@@ -41,12 +41,12 @@ from flask_jwt_extended import JWTManager
 jwt=JWTManager(app)
 
 class FormLogin(FlaskForm):
-    nomeUsuario= StringField("nomeUsuario", validators=[input_required()])
+    nomeUsuario= StringField("nome de usuario", validators=[input_required()])
     senha = StringField("senha", validators=[input_required()])
 
 class FormProtocolo(FlaskForm):
     assunto = StringField("assunto", validators=[input_required()])
-    data = StringField("data", validators=[input_required()])
+    dat = StringField("data", validators=[input_required()])
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -80,31 +80,61 @@ def cadastraUsuario():
         nome = formCadastro.nomeUsuario.data
         senha=formCadastro.senha.data
         adm = Administrador(nome, senha)
+
         db.session.add(adm)
         db.session.commit()
+        return render_template('index.html', form=formCadastro, login=True)
     return render_template('index.html', form=formCadastro)
 #==========protocolos=========
 @app.route('/visual_protocolo')
 def visual_protocolo():
-    protocolos = db.session.query(Protocolo).all()
-    protocoloDict={}
-    for protocolo in protocolos:
-        protocoloDict[protocolo.numero]={"assunto":protocolo.assunto, "data":protocolo.data}
-    return jsonify(protocoloDict)
+    form_protocolo = FormProtocolo()
+    
+    protocoloDict=prot_dict()
+   
+    return render_template("visual_protocolo.html", prot_dicts=protocoloDict, formProtoc = form_protocolo, cadastrar=True)
 
-@app.route('/cad_protocolo', methods=['GET', 'POST'])
+@app.route('/cad_protocolo/', methods=['POST'])
 def cad_protocolo():
     form_protocolo = FormProtocolo()
     
     if form_protocolo.validate_on_submit():
         assunto = form_protocolo.assunto.data
-        data =  form_protocolo.data.data
+        data =  form_protocolo.dat.data
         protocolo = Protocolo(assunto, data)
+     
         db.session.add(protocolo)
         db.session.commit()
-        return "cadastrado com sucesso"
         
-    return render_template('/cadastraProtocolo.html', formProtoc = form_protocolo)
+    return redirect(url_for('visual_protocolo'))
+
+@app.route('/edit_protocolo/', methods=['GET', 'POST'])
+def edit_protocolo():
+    form_protocolo = FormProtocolo()
+    
+    if request.method=='POST':
+        
+        if form_protocolo.validate_on_submit():
+            assunto = form_protocolo.assunto.data
+            data =  form_protocolo.dat.data
+            print(idProtoc)
+            
+        return redirect(url_for('visual_protocolo'))
+    
+    idProtoc = request.args.get('idProtoc') #como eu faço para que o valor do idProtoc seja quardado até que seja realizado uma solicitação post
+    protocolo = db.session.query(Protocolo).filter_by(numero=idProtoc).first() 
+    prot_dicts=prot_dict()
+    return render_template('visual_protocolo.html', protoc=protocolo, prot_dicts=prot_dicts, formProtoc=form_protocolo, cadastrar=False)
+    
+
+def prot_dict():
+    protocolos = db.session.query(Protocolo).all()
+    protocoloDict={}
+    for protocolo in protocolos:
+        protocoloDict[protocolo.numero]={"assunto":protocolo.assunto, "data":protocolo.data}
+    return protocoloDict
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
