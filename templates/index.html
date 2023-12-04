@@ -23,7 +23,6 @@
             <div class="form-group">
                 {{ form.senha.label }} {{ form.senha(size=32) }}<br>
             </div>
-            
             <button type="submit" class="btn btn-primary">entrar</button>
         </form>
         <a href="{{ url_for('cadastraUsuario') }}" class="register-link">cadastrar-se</a>
@@ -37,14 +36,13 @@
             <div class="form-group">
                 {{ form.nomeUsuario.label }} {{ form.nomeUsuario(size=32) }}
             </div>
-            
+
             <div class="form-group">
                 {{ form.senha.label }} {{ form.senha(size=32) }}<br>
             </div>
             
             <button type="submit" class="btn btn-primary">cadastrar</button>
         </form>
-       
     </div>
     {% endif %}
     

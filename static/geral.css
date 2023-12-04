@@ -13,9 +13,7 @@ header {
     background-color: #406b99;
     color: #fff;
     padding: 10px;
-    text-align: auto;
-    width: 100%
-}
-header h1{
-    align-items: center;
+    text-align: center;
+    width: 100%;
+    
 }

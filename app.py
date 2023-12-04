@@ -6,11 +6,11 @@ app = Flask(__name__)
 global cadastrar
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///protocolo.db'
 db = SQLAlchemy(app)
-global idProtoc
+
 app.config['SECRET_KEY'] =  'CHA1321'
 
-class Administrador(db.Model):
-    id_adm=Column(Integer, primary_key=True, autoincrement=True)
+class Funcionario(db.Model):
+    id_func=Column(Integer, primary_key=True, autoincrement=True)
     nomeUsuario = Column(String)
     senha = Column(String)
 
@@ -28,8 +28,8 @@ class Protocolo(db.Model):
         self.data=data
 
 with app.app_context():
-    db.drop_all()
     db.create_all()
+  
   
 #=======autenticação=======
 from flask_wtf import FlaskForm
@@ -51,7 +51,7 @@ class FormProtocolo(FlaskForm):
 @app.route('/', methods=['GET', 'POST'])
 def index():
     formLogin = FormLogin()
-    if formLogin.validate_on_submit(): #testado
+    if formLogin.validate_on_submit():
         
         nomeUsuario = formLogin.nomeUsuario.data
         senha = formLogin.senha.data
@@ -67,7 +67,7 @@ def autenticacao(nomeUsuario, senha):
         return f'usuário ou senha inválida, tente novamente' 
 
 def recuperaUsuarios():
-    users = db.session.query(Administrador).all() 
+    users = db.session.query(Funcionario).all() 
     users_dict={}
     for user in users:
         users_dict[user.nomeUsuario]=user.senha
@@ -79,9 +79,9 @@ def cadastraUsuario():
     if formCadastro.validate_on_submit():
         nome = formCadastro.nomeUsuario.data
         senha=formCadastro.senha.data
-        adm = Administrador(nome, senha)
+        func = Funcionario(nome, senha)
 
-        db.session.add(adm)
+        db.session.add(func)
         db.session.commit()
         return render_template('index.html', form=formCadastro, login=True)
     return render_template('index.html', form=formCadastro)
@@ -112,7 +112,6 @@ def edit_protocolo():
     idProtoc = request.args.get('idProtoc')
     protocolo = db.session.query(Protocolo).filter_by(numero=idProtoc).first() 
     if request.method=='POST':
-        print('idProtoc= ', idProtoc)
         if form_protocolo.validate_on_submit():
             #captura os dados digitados e validados do formulário
             assunto = form_protocolo.assunto.data
@@ -122,19 +121,21 @@ def edit_protocolo():
             protocolo.data=data
             #insere na seção e depois no banco
             db.session.add(protocolo)
-            db.session.commit()
-            
+            db.session.commit()            
         return redirect(url_for('visual_protocolo'))
          
     form_protocolo.idProtoc.data = idProtoc
 
     prot_dicts=prot_dict()
     #agora como eu faço para jogar esses dados [assunto, data] do protoc, nos campos input do formulário
-    form_protocolo.assunto.data = protocolo.assunto
-    form_protocolo.dat.data = protocolo.data
-    return render_template('visual_protocolo.html', protoc=protocolo, prot_dicts=prot_dicts, formProtoc=form_protocolo, cadastrar=False)
+    if idProtoc != None:
+        form_protocolo.assunto.data = protocolo.assunto
+        form_protocolo.dat.data = protocolo.data
+        cadastrar=False
+    else:
+        cadastrar=True
+    return render_template('visual_protocolo.html', protoc=protocolo, prot_dicts=prot_dicts, formProtoc=form_protocolo, cadastrar=cadastrar)
     
-
 def prot_dict():
     protocolos = db.session.query(Protocolo).all()
     protocoloDict={}
