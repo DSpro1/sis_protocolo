@@ -14,7 +14,6 @@ class Administrador(db.Model):
     nomeUsuario = Column(String)
     senha = Column(String)
 
-
     def __init__(self, nomeUsuario, senha):
         self.nomeUsuario = nomeUsuario
         self.senha=senha
