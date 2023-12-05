@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, redirect, jsonify, request
+from flask import Flask, render_template, url_for, redirect, jsonify, request, session
 from sqlalchemy import Column, Integer, String
 from flask_sqlalchemy import SQLAlchemy
 
@@ -19,13 +19,15 @@ class Funcionario(db.Model):
         self.senha=senha
 
 class Protocolo(db.Model):
-    numero= Column(Integer, primary_key=True, autoincrement=True)
-    assunto = Column(String)
-    data=Column(String)
+    numero      = Column(Integer, primary_key=True, autoincrement=True)
+    assunto     = Column(String)
+    data        = Column(String)
+    responsavel = Column(String)
 
-    def __init__(self, assunto, data):
+    def __init__(self, assunto, data, responsavel):
         self.assunto=assunto
         self.data=data
+        self.responsavel=responsavel
 
 with app.app_context():
     db.create_all()
@@ -33,7 +35,7 @@ with app.app_context():
   
 #=======autenticação=======
 from flask_wtf import FlaskForm
-from wtforms import HiddenField, StringField
+from wtforms import HiddenField, StringField, PasswordField
 from wtforms.validators import input_required
 from flask_jwt_extended import JWTManager
 
@@ -41,7 +43,7 @@ jwt=JWTManager(app)
 
 class FormLogin(FlaskForm):
     nomeUsuario= StringField("nome de usuario", validators=[input_required()])
-    senha = StringField("senha", validators=[input_required()])
+    senha = PasswordField("senha", validators=[input_required()])
 
 class FormProtocolo(FlaskForm):
     idProtoc = HiddenField('ID Protocolo')
@@ -54,14 +56,20 @@ def index():
     if formLogin.validate_on_submit():
         
         nomeUsuario = formLogin.nomeUsuario.data
+        
         senha = formLogin.senha.data
                
         return autenticacao(nomeUsuario, senha)
     return render_template('index.html', form = formLogin, login=True)
+@app.route('/logout/')
+def logout():
+    session['funcionario']=None
+    return redirect('/')
 
 def autenticacao(nomeUsuario, senha):
     users=recuperaUsuarios()
     if nomeUsuario in users and users[nomeUsuario]==senha:
+        session['responsavel'] = nomeUsuario
         return redirect(url_for('visual_protocolo'))
     else:
         return f'usuário ou senha inválida, tente novamente' 
@@ -99,8 +107,10 @@ def cad_protocolo():
     if form_protocolo.validate_on_submit():
         assunto = form_protocolo.assunto.data
         data =  form_protocolo.dat.data
-        protocolo = Protocolo(assunto, data)
-     
+        responsavel=session['responsavel']
+        print(session['responsavel'])
+        protocolo = Protocolo(assunto, data, responsavel)
+
         db.session.add(protocolo)
         db.session.commit()
         
@@ -140,7 +150,7 @@ def prot_dict():
     protocolos = db.session.query(Protocolo).all()
     protocoloDict={}
     for protocolo in protocolos:
-        protocoloDict[protocolo.numero]={"assunto":protocolo.assunto, "data":protocolo.data}
+        protocoloDict[protocolo.numero]={"assunto":protocolo.assunto, "data":protocolo.data, "responsavel":protocolo.responsavel}
     return protocoloDict
 
 

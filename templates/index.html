@@ -7,13 +7,12 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="../static/geral.css">
     <link rel="stylesheet" href="../static/login.css">
-    <link rel="sytlesheet" href="../static/formulario.css">
+    
 </head>
 <body>
     {% if login %}
     <div class="login-container">
         <h2>Login</h2>
-        
         <form method="POST" action="{{ url_for('index') }}" class="login-form">
             {{ form.hidden_tag() }}
             <div class="form-group">
@@ -28,8 +27,8 @@
         <a href="{{ url_for('cadastraUsuario') }}" class="register-link">cadastrar-se</a>
     </div>
     {% else %}
-    <div class="form-container">
-        <h2>CADASTRAR USUÁRIO</h2>
+    <div class="form-container-cadUser">
+        <h2 style="color:whitesmoke">CADASTRAR USUÁRIO</h2>
         <!--Estes campos estão sendo mostrados desalinhados faça eles ficaram alinhados-->
         <form method="POST" action="{{ url_for('cadastraUsuario') }}" class="login-form">
             {{ form.hidden_tag() }}
